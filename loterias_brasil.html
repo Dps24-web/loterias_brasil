@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Loterias Brasil — Gerador Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0A0F1A;
+  --surface: #111827;
+  --surface2: #1F2937;
+  --text: #F1F5F9;
+  --muted: #6B7280;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Nunito', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+body::before {
+  content:'';
+  position:fixed; inset:0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size: 36px 36px;
+  pointer-events:none; z-index:0;
+}
+
+.wrap {
+  position:relative; z-index:1;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 16px 80px;
+}
+
+header { text-align:center; margin-bottom:40px; }
+
+.header-badge {
+  display:inline-block;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  font-family:'Space Mono',monospace;
+  font-size:10px; letter-spacing:3px;
+  color: #94A3B8;
+  padding:5px 14px; border-radius:20px; margin-bottom:16px;
+  text-transform:uppercase;
+}
+
+h1 {
+  font-family:'Bebas Neue',sans-serif;
+  font-size: clamp(56px, 10vw, 100px);
+  line-height:1;
+  background: linear-gradient(135deg, #FACC15, #F97316, #EF4444, #EC4899);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  filter: drop-shadow(0 0 40px rgba(249,115,22,0.3));
+  animation: headPulse 4s ease-in-out infinite;
+}
+
+@keyframes headPulse {
+  0%,100%{filter:drop-shadow(0 0 30px rgba(249,115,22,0.3))}
+  50%{filter:drop-shadow(0 0 60px rgba(249,115,22,0.6))}
+}
+
+.header-sub {
+  font-family:'Space Mono',monospace;
+  font-size:12px; letter-spacing:3px; color:var(--muted); margin-top:8px;
+}
+
+.loterias-grid {
+  display:grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap:14px;
+  margin-bottom:30px;
+}
+
+@media(min-width:700px){ .loterias-grid { grid-template-columns: repeat(4, 1fr); } }
+@media(min-width:1000px){ .loterias-grid { grid-template-columns: repeat(5, 1fr); } }
+
+.lot-btn {
+  position:relative;
+  border:none; border-radius:14px;
+  padding:0; cursor:pointer;
+  overflow:hidden;
+  transition: transform 0.18s, box-shadow 0.18s;
+  aspect-ratio: 2.6/1;
+  min-height:62px;
+}
+
+.lot-btn:hover { transform:scale(1.04); }
+.lot-btn:active { transform:scale(0.97); }
+
+.lot-btn.ativo {
+  transform:scale(1.05);
+  outline:3px solid white;
+  outline-offset:2px;
+}
+
+.lot-btn-inner {
+  position:absolute; inset:0;
+  display:flex; align-items:center; justify-content:center;
+  gap:8px;
+  font-family:'Nunito',sans-serif;
+  font-weight:900;
+  font-size:clamp(11px,1.8vw,14px);
+  letter-spacing:1.2px;
+  text-transform:uppercase;
+  color:white;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.4);
+  padding:0 12px;
+}
+
+.lot-ico { font-size:16px; flex-shrink:0; }
+
+.lot-mega      { background: linear-gradient(135deg,#16A34A,#22C55E); box-shadow:0 4px 20px rgba(34,197,94,0.4); }
+.lot-time      { background: linear-gradient(135deg,#7C3AED,#A855F7); box-shadow:0 4px 20px rgba(168,85,247,0.4); }
+.lot-quina     { background: linear-gradient(135deg,#7C3AED,#6D28D9); box-shadow:0 4px 20px rgba(124,58,237,0.4); }
+.lot-lotomania { background: linear-gradient(135deg,#EA580C,#F97316); box-shadow:0 4px 20px rgba(249,115,22,0.4); }
+.lot-dupla     { background: linear-gradient(135deg,#DC2626,#EF4444); box-shadow:0 4px 20px rgba(239,68,68,0.4); }
+.lot-federal   { background: linear-gradient(135deg,#0891B2,#06B6D4); box-shadow:0 4px 20px rgba(6,182,212,0.4); }
+.lot-instant   { background: linear-gradient(135deg,#B45309,#FBBF24); box-shadow:0 4px 20px rgba(251,191,36,0.4); }
+.lot-loteca    { background: linear-gradient(135deg,#BE185D,#EC4899); box-shadow:0 4px 20px rgba(236,72,153,0.4); }
+.lot-lotogol   { background: linear-gradient(135deg,#0369A1,#38BDF8); box-shadow:0 4px 20px rgba(56,189,248,0.4); }
+.lot-lotofacil { background: linear-gradient(135deg,#15803D,#86EFAC); box-shadow:0 4px 20px rgba(134,239,172,0.4); }
+
+.painel {
+  background: var(--surface);
+  border-radius:20px;
+  border:1px solid rgba(255,255,255,0.08);
+  padding:28px;
+  margin-bottom:20px;
+  position:relative; overflow:hidden;
+}
+
+.painel::before {
+  content:''; position:absolute; top:0;left:0;right:0;height:2px;
+  background: var(--lot-color, linear-gradient(90deg, #FACC15,#F97316));
+  transition: background 0.4s;
+}
+
+.painel-topo {
+  display:flex; align-items:center; gap:14px; margin-bottom:22px;
+}
+
+.painel-ico {
+  width:48px;height:48px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;
+  background: var(--lot-bg, rgba(255,255,255,0.1));
+  flex-shrink:0;
+}
+
+.painel-nome {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:32px; color:white; line-height:1;
+}
+
+.painel-desc {
+  font-family:'Space Mono',monospace;
+  font-size:10px; letter-spacing:1px; color:var(--muted); margin-top:2px;
+}
+
+.controls-row {
+  display:flex; gap:14px; flex-wrap:wrap; align-items:flex-end; margin-bottom:20px;
+}
+
+.field { display:flex;flex-direction:column;gap:6px; }
+
+label {
+  font-family:'Space Mono',monospace;
+  font-size:10px; letter-spacing:1.5px; color:var(--muted); text-transform:uppercase;
+}
+
+input[type="number"],input[type="text"] {
+  background:var(--surface2); border:1px solid rgba(255,255,255,0.1);
+  color:var(--text); font-family:'Space Mono',monospace; font-size:14px;
+  padding:10px 14px; border-radius:10px; outline:none;
+  transition:border-color 0.2s, box-shadow 0.2s; width:100%;
+}
+
+input:focus { border-color:var(--accent,#FACC15); box-shadow:0 0 0 3px rgba(250,204,21,0.1); }
+
+.qtd-row { display:flex;gap:6px;flex-wrap:wrap;margin-top:4px; }
+
+.qtd-btn {
+  background:var(--surface2); border:1px solid rgba(255,255,255,0.12);
+  color:var(--muted); font-family:'Space Mono',monospace; font-size:12px;
+  padding:7px 13px; border-radius:8px; cursor:pointer; transition:all 0.2s;
+}
+
+.qtd-btn.ativo {
+  background:rgba(250,204,21,0.12); border-color:var(--accent,#FACC15);
+  color:var(--accent,#FACC15); box-shadow:0 0 10px rgba(250,204,21,0.15);
+}
+
+.qtd-btn:hover { border-color:var(--accent,#FACC15); color:var(--accent,#FACC15); }
+
+.acoes { display:flex;gap:10px;flex-wrap:wrap; }
+
+.btn-acao {
+  padding:11px 20px; border:none; border-radius:10px;
+  font-family:'Nunito',sans-serif; font-weight:800; font-size:13px;
+  cursor:pointer; transition:all 0.18s; letter-spacing:0.5px;
+}
+
+.btn-acao:active { transform:scale(0.96); }
+
+.btn-gerar {
+  color:white;
+  background: var(--lot-color, linear-gradient(135deg,#FACC15,#F97316));
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  flex:1; min-width:120px;
+}
+
+.btn-mais { background:rgba(34,197,94,0.15); color:#4ADE80; border:1px solid rgba(34,197,94,0.3); }
+.btn-menos { background:rgba(100,116,139,0.15); color:#94A3B8; border:1px solid rgba(100,116,139,0.3); }
+.btn-exp { background:rgba(14,165,233,0.15); color:#38BDF8; border:1px solid rgba(14,165,233,0.3); }
+.btn-limpar { background:rgba(239,68,68,0.12); color:#F87171; border:1px solid rgba(239,68,68,0.25); }
+
+#resultados { min-height:80px; }
+
+.empty { text-align:center; padding:50px 20px; color:var(--muted); }
+.empty-ico { font-size:40px; margin-bottom:12px; opacity:0.4; }
+.empty p { font-family:'Space Mono',monospace; font-size:12px; letter-spacing:1px; }
+
+.jogo-card {
+  background:var(--surface2);
+  border:1px solid rgba(255,255,255,0.07);
+  border-radius:14px; padding:16px 18px;
+  margin-bottom:12px;
+  display:flex; align-items:center; gap:14px;
+  animation:slideIn 0.35s ease both;
+  transition:border-color 0.2s, box-shadow 0.2s;
+}
+
+.jogo-card:hover {
+  border-color:rgba(255,255,255,0.15);
+  box-shadow:0 4px 20px rgba(0,0,0,0.3);
+}
+
+@keyframes slideIn {
+  from{opacity:0;transform:translateY(10px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+.jogo-num {
+  font-family:'Bebas Neue',sans-serif; font-size:26px;
+  color:rgba(255,255,255,0.2); min-width:44px; line-height:1;
+}
+
+.bolas { display:flex;flex-wrap:wrap;gap:6px;flex:1; }
+
+.bola {
+  width:34px; height:34px; border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Space Mono',monospace; font-size:11px; font-weight:700;
+  cursor:default; transition:transform 0.15s;
+  animation:popIn 0.3s cubic-bezier(.34,1.56,.64,1) both;
+}
+
+.bola:hover { transform:scale(1.2); }
+
+@keyframes popIn {
+  from{transform:scale(0) rotate(-20deg);opacity:0}
+  to{transform:scale(1) rotate(0);opacity:1}
+}
+
+.b-verde   { background:radial-gradient(circle at 35% 35%,#4ADE80,#15803D); color:#052E16; box-shadow:0 2px 8px rgba(34,197,94,0.5); }
+.b-azul    { background:radial-gradient(circle at 35% 35%,#60A5FA,#1D4ED8); color:#EFF6FF; box-shadow:0 2px 8px rgba(59,130,246,0.5); }
+.b-roxo    { background:radial-gradient(circle at 35% 35%,#C084FC,#7C3AED); color:#F5F3FF; box-shadow:0 2px 8px rgba(124,58,237,0.5); }
+.b-laranja { background:radial-gradient(circle at 35% 35%,#FB923C,#C2410C); color:#FFF7ED; box-shadow:0 2px 8px rgba(249,115,22,0.5); }
+.b-vermelho{ background:radial-gradient(circle at 35% 35%,#F87171,#B91C1C); color:#FFF1F2; box-shadow:0 2px 8px rgba(239,68,68,0.5); }
+.b-ciano   { background:radial-gradient(circle at 35% 35%,#67E8F9,#0E7490); color:#083344; box-shadow:0 2px 8px rgba(6,182,212,0.5); }
+.b-ouro    { background:radial-gradient(circle at 35% 35%,#FCD34D,#B45309); color:#451A03; box-shadow:0 2px 8px rgba(245,158,11,0.5); }
+.b-rosa    { background:radial-gradient(circle at 35% 35%,#F9A8D4,#BE185D); color:#500724; box-shadow:0 2px 8px rgba(236,72,153,0.5); }
+.b-sky     { background:radial-gradient(circle at 35% 35%,#7DD3FC,#0369A1); color:#082F49; box-shadow:0 2px 8px rgba(56,189,248,0.5); }
+.b-lima    { background:radial-gradient(circle at 35% 35%,#BEF264,#4D7C0F); color:#1A2E05; box-shadow:0 2px 8px rgba(132,204,22,0.5); }
+.b-cinza   { background:radial-gradient(circle at 35% 35%,#94A3B8,#334155); color:#F1F5F9; box-shadow:0 2px 8px rgba(0,0,0,0.3); }
+
+.jogo-meta {
+  font-family:'Space Mono',monospace;
+  font-size:10px; color:var(--muted);
+  text-align:right; min-width:60px; line-height:1.7;
+}
+
+.jogo-meta .destaque { color:var(--accent,#FACC15); font-size:12px; }
+
+.load-bar {
+  height:2px; border-radius:2px;
+  animation:loadAnim 0.5s ease; margin-bottom:16px;
+  background:var(--lot-color, linear-gradient(90deg,#FACC15,#F97316));
+}
+
+@keyframes loadAnim { from{width:0%} to{width:100%} }
+
+#toast {
+  position:fixed; bottom:24px; left:50%;
+  transform:translateX(-50%) translateY(70px);
+  background:var(--surface); border:1px solid rgba(255,255,255,0.1);
+  color:#4ADE80; font-family:'Space Mono',monospace; font-size:12px;
+  padding:12px 24px; border-radius:30px;
+  box-shadow:0 8px 30px rgba(0,0,0,0.5);
+  transition:transform 0.4s cubic-bezier(.34,1.56,.64,1);
+  z-index:999; pointer-events:none;
+}
+#toast.show { transform:translateX(-50%) translateY(0); }
+
+#frase {
+  text-align:center; font-family:'Space Mono',monospace; font-size:12px;
+  letter-spacing:1px; color:var(--muted); margin-bottom:24px;
+  min-height:20px; transition:opacity 0.4s;
+}
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 14px; }
+::-webkit-scrollbar-track { background: #1a1f2e; border-left: 1px solid rgba(255,255,255,0.05); }
+::-webkit-scrollbar-thumb { background: #3a3f52; border-radius: 3px; border: 3px solid #1a1f2e; min-height: 40px; }
+::-webkit-scrollbar-thumb:hover { background: #52586e; }
+::-webkit-scrollbar-button { background: #1a1f2e; border: 1px solid rgba(255,255,255,0.06); height: 16px; display: block; }
+::-webkit-scrollbar-button:vertical:decrement {
+  background-color: #1a1f2e;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M5 0L10 6H0Z' fill='%236b7280'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: center;
+}
+::-webkit-scrollbar-button:vertical:increment {
+  background-color: #1a1f2e;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0L10 0L5 6Z' fill='%23EF4444'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: center;
+}
+::-webkit-scrollbar-corner { background: #1a1f2e; }
+
+.stats { display:flex;gap:24px;flex-wrap:wrap;margin-top:16px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.06); }
+.stat { font-family:'Space Mono',monospace;font-size:10px;color:var(--muted); }
+.stat strong { color:var(--accent,#FACC15); font-size:13px; display:block; }
+
+.alerta {
+  background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3);
+  color:#FCA5A5; font-family:'Space Mono',monospace; font-size:12px;
+  padding:14px 18px; border-radius:10px; text-align:center;
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="header-badge">✦ Gerador Profissional ✦</div>
+    <h1>LOTERIAS BRASIL</h1>
+    <p class="header-sub">ESCOLHA SUA SORTE · ESTRATÉGIA · ANÁLISE</p>
+  </header>
+
+  <div id="frase"></div>
+  <div class="loterias-grid" id="loteriasGrid"></div>
+
+  <div class="painel" id="painelGerador" style="display:none">
+    <div class="painel-topo">
+      <div class="painel-ico" id="painelIco"></div>
+      <div>
+        <div class="painel-nome" id="painelNome">—</div>
+        <div class="painel-desc" id="painelDesc">—</div>
+      </div>
+    </div>
+
+    <div class="controls-row">
+      <div class="field">
+        <label>Qtd. de Jogos</label>
+        <input type="number" id="qtdJogos" value="5" min="1" max="50" style="width:100px">
+      </div>
+      <div class="field" id="campoQtdNums" style="display:none">
+        <label>Números por Jogo</label>
+        <div class="qtd-row" id="qtdNumsRow"></div>
+      </div>
+      <div class="field">
+        <label>Incluir (ex: 3 7 15)</label>
+        <input type="text" id="incluir" placeholder="números separados por espaço" style="min-width:180px">
+      </div>
+      <div class="field">
+        <label>Excluir (ex: 2 8)</label>
+        <input type="text" id="excluir" placeholder="números separados por espaço" style="min-width:180px">
+      </div>
+    </div>
+
+    <div class="acoes">
+      <button class="btn-acao btn-gerar" onclick="gerarJogos('aleatorio')">🎲 Gerar Aleatório</button>
+      <button class="btn-acao btn-mais" onclick="gerarJogos('mais')">📈 Mais Sorteados</button>
+      <button class="btn-acao btn-menos" onclick="gerarJogos('menos')">📉 Menos Sorteados</button>
+      <button class="btn-acao btn-exp" onclick="exportar()">💾 Exportar</button>
+      <button class="btn-acao btn-limpar" onclick="limpar()">🗑 Limpar</button>
+    </div>
+  </div>
+
+  <div class="painel" id="painelResultados" style="display:none">
+    <div style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--muted);margin-bottom:16px;text-transform:uppercase">// Jogos Gerados</div>
+    <div id="resultados">
+      <div class="empty">
+        <div class="empty-ico">🎱</div>
+        <p>Nenhum jogo ainda.<br>Clique em Gerar acima.</p>
+      </div>
+    </div>
+    <div class="stats" id="statsBar" style="display:none">
+      <div class="stat"><strong id="s1">0</strong>Jogos</div>
+      <div class="stat"><strong id="s2">—</strong>Nums/Jogo</div>
+      <div class="stat"><strong id="s3">—</strong>Estratégia</div>
+      <div class="stat"><strong id="s4">—</strong>Loteria</div>
+    </div>
+  </div>
+
+</div>
+
+<div id="toast">✅ Exportado com sucesso!</div>
+
+<script>
+const LOTERIAS = {
+  mega: {
+    nome: 'Mega-Sena', ico: '🍀', classe: 'lot-mega', accent: '#22C55E',
+    bg: 'linear-gradient(135deg,#16A34A,#22C55E)', bolaCor: 'b-verde',
+    min: 6, max: 20, padrao: 6, variaveis: [6,7,8,9,10,11,12,13,14,15],
+    total: 60, desc: 'Escolha de 6 a 15 números de 1 a 60',
+    mais: [10,53,27,4,23,42,33,44,51,3,5,9,41,24,12,8,38,36,60,2],
+    menos: [7,19,22,31,47,55,58,11,16,29,32,40,48,50,57,17,18,25,26,34]
+  },
+  time: {
+    nome: 'Timemania', ico: '⚽', classe: 'lot-time', accent: '#A855F7',
+    bg: 'linear-gradient(135deg,#7C3AED,#A855F7)', bolaCor: 'b-roxo',
+    min: 10, max: 10, padrao: 10, variaveis: null, total: 80,
+    desc: 'Escolha 10 números de 1 a 80 + 1 time',
+    mais: [13,10,51,29,19,47,8,24,37,60,72,14,33,5,41,66,7,22,55,80],
+    menos: [2,17,34,49,63,75,11,26,39,52,64,77,3,18,35,50,65,76,12,27]
+  },
+  quina: {
+    nome: 'Quina', ico: '🔮', classe: 'lot-quina', accent: '#9333EA',
+    bg: 'linear-gradient(135deg,#7C3AED,#6D28D9)', bolaCor: 'b-roxo',
+    min: 5, max: 15, padrao: 5, variaveis: [5,6,7,8,9,10,11,12,13,14,15],
+    total: 80, desc: 'Escolha de 5 a 15 números de 1 a 80',
+    mais: [4,13,47,72,5,19,33,58,74,1,23,45,62,80,11,28,52,67,3,17],
+    menos: [7,22,41,63,77,9,31,54,69,2,16,38,56,71,6,25,48,64,79,14]
+  },
+  lotomania: {
+    nome: 'Lotomania', ico: '🎰', classe: 'lot-lotomania', accent: '#F97316',
+    bg: 'linear-gradient(135deg,#EA580C,#F97316)', bolaCor: 'b-laranja',
+    min: 50, max: 50, padrao: 50, variaveis: null, total: 100,
+    desc: 'Marque exatamente 50 números de 00 a 99',
+    mais: [13,22,41,60,77,4,19,37,55,72,8,26,44,62,79,2,17,35,53,70,11,29,47,65,82,6,24,42,59,76,0,15,33,51,68,85,9,27,45,63,80,3,21,39,57,74,91,7,25,43],
+    menos: [1,10,20,30,40,50,66,78,89,99,5,14,23,32,46,58,67,81,92,12]
+  },
+  dupla: {
+    nome: 'Dupla Sena', ico: '🎯', classe: 'lot-dupla', accent: '#EF4444',
+    bg: 'linear-gradient(135deg,#DC2626,#EF4444)', bolaCor: 'b-vermelho',
+    min: 6, max: 15, padrao: 6, variaveis: [6,7,8,9,10,11,12,13,14,15],
+    total: 50, desc: 'Escolha de 6 a 15 números de 1 a 50 — 2 sorteios',
+    mais: [13,5,33,27,4,41,19,50,22,37,11,44,8,30,17,48,2,25,39,15],
+    menos: [1,6,10,14,20,24,28,32,36,40,45,49,3,7,12,16,21,26,31,35]
+  },
+  federal: {
+    nome: 'Federal', ico: '🏛️', classe: 'lot-federal', accent: '#06B6D4',
+    bg: 'linear-gradient(135deg,#0891B2,#06B6D4)', bolaCor: 'b-ciano',
+    min: 5, max: 5, padrao: 5, variaveis: null, total: 100000,
+    desc: 'Bilhetes de 5 dígitos (00000 a 99999)',
+    mais: null, menos: null, isBilhete: true
+  },
+  instant: {
+    nome: 'Instantânea', ico: '⚡', classe: 'lot-instant', accent: '#FBBF24',
+    bg: 'linear-gradient(135deg,#B45309,#FBBF24)', bolaCor: 'b-ouro',
+    min: 6, max: 6, padrao: 6, variaveis: null, total: 60,
+    desc: 'Escolha 6 números de 1 a 60',
+    mais: [7,14,23,41,55,3,18,29,44,58,1,12,27,38,50,60,9,21,36,47],
+    menos: [2,11,20,32,43,56,4,15,24,35,48,57,6,17,26,37,49,59,8,19]
+  },
+  loteca: {
+    nome: 'Loteca', ico: '🏆', classe: 'lot-loteca', accent: '#EC4899',
+    bg: 'linear-gradient(135deg,#BE185D,#EC4899)', bolaCor: 'b-rosa',
+    min: null, max: null, padrao: null, variaveis: null,
+    total: 14, isLoteca: true,
+    desc: 'Marque resultado dos 14 jogos (1=Casa, 2=Empate, 3=Fora)',
+    mais: null, menos: null
+  },
+  lotogol: {
+    nome: 'Lotogol', ico: '⚽', classe: 'lot-lotogol', accent: '#38BDF8',
+    bg: 'linear-gradient(135deg,#0369A1,#38BDF8)', bolaCor: 'b-sky',
+    min: null, max: null, padrao: null, variaveis: null,
+    total: 5, isLotogol: true,
+    desc: 'Adivinhe o placar de 5 jogos',
+    mais: null, menos: null
+  },
+  lotofacil: {
+    nome: 'Lotofácil', ico: '🌟', classe: 'lot-lotofacil', accent: '#86EFAC',
+    bg: 'linear-gradient(135deg,#15803D,#86EFAC)', bolaCor: 'b-lima',
+    min: 15, max: 20, padrao: 15, variaveis: [15,16,17,18,19,20],
+    total: 25, desc: 'Escolha de 15 a 20 números de 1 a 25',
+    mais: [10,25,11,13,24,14,4,1,3,12,5,2,9,22,18,19,21,15,7,17,6,23,8,16,20],
+    menos: [23,18,2,8,20,13,5,17,11,6,19,22,25,24,16,21,12,4,3,1,7,9,14,10,15]
+  }
+};
+
+const frases = [
+  "📊 Estatística e estratégia fazem a diferença.",
+  "💼 Planejamento hoje, resultado amanhã.",
+  "🎯 Jogue com inteligência, não com impulso.",
+  "📈 Disciplina consistente também é sorte.",
+  "✅ Confiança nos seus números.",
+  "🔢 Cada combinação é única. Essa pode ser a sua.",
+  "⚡ Análise de dados + intuição = resultado.",
+  "🏆 Os grandes jogadores constroem sistemas.",
+  "🧠 Sorte favorece quem se prepara.",
+  "🌟 Uma boa estratégia vale mais que mil apostas no escuro."
+];
+
+let lotAtual = null, qtdNums = 15, jogosGerados = [], estrategiaAtual = '', fraseIdx = 0;
+
+function init() { renderBotoes(); trocarFrase(); setInterval(trocarFrase, 5000); }
+
+function trocarFrase() {
+  const el = document.getElementById('frase');
+  el.style.opacity = '0';
+  setTimeout(() => { el.textContent = frases[fraseIdx++ % frases.length]; el.style.opacity = '1'; }, 350);
+}
+
+function renderBotoes() {
+  const grid = document.getElementById('loteriasGrid');
+  grid.innerHTML = '';
+  Object.entries(LOTERIAS).forEach(([key, lot]) => {
+    const btn = document.createElement('button');
+    btn.className = `lot-btn ${lot.classe}`;
+    btn.id = `btn-${key}`;
+    btn.onclick = () => selecionarLoteria(key);
+    btn.innerHTML = `<div class="lot-btn-inner"><span class="lot-ico">${lot.ico}</span>${lot.nome}</div>`;
+    grid.appendChild(btn);
+  });
+}
+
+function selecionarLoteria(key) {
+  lotAtual = key;
+  const lot = LOTERIAS[key];
+  document.querySelectorAll('.lot-btn').forEach(b => b.classList.remove('ativo'));
+  document.getElementById(`btn-${key}`).classList.add('ativo');
+  document.documentElement.style.setProperty('--accent', lot.accent);
+  document.querySelector('#painelGerador').style.setProperty('--lot-color', lot.bg);
+  document.querySelector('#painelGerador').style.setProperty('--lot-bg', lot.bg);
+  document.querySelector('#painelResultados').style.setProperty('--lot-color', lot.bg);
+  document.getElementById('painelIco').textContent = lot.ico;
+  document.getElementById('painelIco').style.background = lot.bg;
+  document.getElementById('painelNome').textContent = lot.nome.toUpperCase();
+  document.getElementById('painelDesc').textContent = lot.desc;
+  const campoQtd = document.getElementById('campoQtdNums');
+  const qtdRow = document.getElementById('qtdNumsRow');
+  if (lot.variaveis) {
+    campoQtd.style.display = '';
+    qtdRow.innerHTML = '';
+    qtdNums = lot.padrao;
+    lot.variaveis.forEach(v => {
+      const b = document.createElement('button');
+      b.className = 'qtd-btn' + (v === lot.padrao ? ' ativo' : '');
+      b.textContent = v;
+      b.onclick = () => { document.querySelectorAll('.qtd-btn').forEach(x => x.classList.remove('ativo')); b.classList.add('ativo'); qtdNums = v; };
+      qtdRow.appendChild(b);
+    });
+  } else { campoQtd.style.display = 'none'; qtdNums = lot.padrao || lot.min || 6; }
+  document.getElementById('painelGerador').style.display = '';
+  document.getElementById('painelResultados').style.display = '';
+  document.getElementById('resultados').innerHTML = `<div class="empty"><div class="empty-ico">${lot.ico}</div><p>Pronto! Clique em Gerar.</p></div>`;
+  document.getElementById('statsBar').style.display = 'none';
+  limparInputs();
+}
+
+function jogoValidoLotofacil(jogo) {
+  const pares = jogo.filter(n => n % 2 === 0).length;
+  return pares >= 6 && pares <= 10;
+}
+
+function gerarNumeros(base, incluir, excluir, total, qtd) {
+  incluir = (incluir||[]).filter(n => n>=1 && n<=total);
+  excluir = new Set(excluir||[]);
+  let pool = [];
+  if (base) pool = base.filter(n => !excluir.has(n));
+  else { for(let i=1;i<=total;i++) if(!excluir.has(i)) pool.push(i); }
+  let jogo = new Set(incluir.filter(n => pool.includes(n)));
+  let tentativas = 0;
+  while(jogo.size < qtd && tentativas < 1000) { jogo.add(pool[Math.floor(Math.random()*pool.length)]); tentativas++; }
+  return [...jogo].slice(0,qtd).sort((a,b)=>a-b);
+}
+
+function gerarJogoLoteria(tipo) {
+  const lot = LOTERIAS[lotAtual];
+  const incluir = document.getElementById('incluir').value.split(/[\s,]+/).filter(n=>n&&!isNaN(n)).map(Number);
+  const excluir = document.getElementById('excluir').value.split(/[\s,]+/).filter(n=>n&&!isNaN(n)).map(Number);
+  if (lot.isBilhete) return { tipo:'bilhete', numeros:[String(Math.floor(Math.random()*100000)).padStart(5,'0')] };
+  if (lot.isLoteca) return { tipo:'loteca', numeros: Array.from({length:14}, () => Math.floor(Math.random()*3)+1) };
+  if (lot.isLotogol) return { tipo:'lotogol', numeros: Array.from({length:5}, () => `${Math.floor(Math.random()*6)}x${Math.floor(Math.random()*6)}`) };
+  let base = tipo==='mais'&&lot.mais ? lot.mais : tipo==='menos'&&lot.menos ? lot.menos : null;
+  let jogo, t=0;
+  do { jogo = gerarNumeros(base, incluir, excluir, lot.total, qtdNums); t++; }
+  while(lotAtual==='lotofacil' && !jogoValidoLotofacil(jogo) && t<200);
+  return { tipo:'numeros', numeros:jogo };
+}
+
+function gerarJogos(tipo) {
+  if (!lotAtual) { alert('Selecione uma loteria primeiro!'); return; }
+  const qtd = Math.min(50, Math.max(1, parseInt(document.getElementById('qtdJogos').value)||5));
+  const lot = LOTERIAS[lotAtual];
+  estrategiaAtual = {aleatorio:'Aleatório',mais:'Mais Sorteados',menos:'Menos Sorteados'}[tipo];
+  jogosGerados = [];
+  const usados = [];
+  for(let i=0;i<qtd;i++) {
+    let j, t=0;
+    do { j=gerarJogoLoteria(tipo); t++; } while(usados.some(u=>u.join()===j.numeros.join()) && t<200);
+    usados.push(j.numeros); jogosGerados.push(j);
+  }
+  renderJogos(lot);
+}
+
+function renderJogos(lot) {
+  const div = document.getElementById('resultados');
+  div.innerHTML = '<div class="load-bar"></div>';
+  setTimeout(() => {
+    let html = '';
+    jogosGerados.forEach((j, i) => {
+      let bolas = '';
+      if (j.tipo==='bilhete') {
+        bolas = `<div class="bola b-ciano" style="width:auto;padding:0 14px;border-radius:8px;animation-delay:${i*60}ms">${j.numeros[0]}</div>`;
+      } else if (j.tipo==='loteca') {
+        bolas = j.numeros.map((r,bi)=>`<div class="bola ${r===1?'b-verde':r===2?'b-ouro':'b-vermelho'}" style="animation-delay:${bi*25+i*60}ms" title="${r===1?'Casa':r===2?'Empate':'Fora'}">${r===1?'C':r===2?'E':'F'}</div>`).join('');
+      } else if (j.tipo==='lotogol') {
+        bolas = j.numeros.map((p,bi)=>`<div class="bola b-sky" style="width:auto;padding:0 10px;border-radius:8px;font-size:10px;animation-delay:${bi*25+i*60}ms">${p}</div>`).join('');
+      } else {
+        bolas = j.numeros.map((n,bi)=>`<div class="bola ${lot.bolaCor}" style="animation-delay:${bi*20+i*55}ms">${String(n).padStart(2,'0')}</div>`).join('');
+      }
+      const meta = j.tipo==='numeros' ? `<span class="destaque">${j.numeros.length}</span>nums` : `<span class="destaque">${lot.nome}</span>`;
+      html += `<div class="jogo-card" style="animation-delay:${i*50}ms"><div class="jogo-num">#${String(i+1).padStart(2,'0')}</div><div class="bolas">${bolas}</div><div class="jogo-meta">${meta}</div></div>`;
+    });
+    div.innerHTML = html;
+    document.getElementById('statsBar').style.display='flex';
+    document.getElementById('s1').textContent = jogosGerados.length;
+    document.getElementById('s2').textContent = qtdNums||'—';
+    document.getElementById('s3').textContent = estrategiaAtual;
+    document.getElementById('s4').textContent = lot.nome;
+  }, 80);
+}
+
+function limparInputs() { document.getElementById('incluir').value=''; document.getElementById('excluir').value=''; }
+
+function limpar() {
+  limparInputs();
+  document.getElementById('qtdJogos').value='5';
+  document.getElementById('resultados').innerHTML=`<div class="empty"><div class="empty-ico">🎱</div><p>Clique em Gerar.</p></div>`;
+  document.getElementById('statsBar').style.display='none';
+  jogosGerados=[];
+}
+
+function exportar() {
+  if (!jogosGerados.length) { mostrarToast('⚠️ Gere jogos primeiro!'); return; }
+  const lot = LOTERIAS[lotAtual];
+  let txt = `LOTERIAS BRASIL — Gerador Profissional\nLoteria: ${lot.nome} | Estratégia: ${estrategiaAtual}\nGerado em: ${new Date().toLocaleString('pt-BR')}\n${'═'.repeat(55)}\n\n`;
+  jogosGerados.forEach((j,i) => {
+    txt += `Jogo ${String(i+1).padStart(2,'0')}:  `;
+    if (j.tipo==='bilhete') txt += `Bilhete ${j.numeros[0]}`;
+    else if (j.tipo==='loteca') txt += j.numeros.map(r=>r===1?'C':r===2?'E':'F').join(' ');
+    else txt += j.numeros.map(n=>String(n).padStart(2,'0')).join(' - ');
+    txt+='\n';
+  });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([txt],{type:'text/plain;charset=utf-8'}));
+  a.download = `loterias_${lotAtual}_${Date.now()}.txt`;
+  a.click();
+  mostrarToast('✅ Exportado com sucesso!');
+}
+
+function mostrarToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2500);
+}
+
+init();
+</script>
+</body>
+</html>
